@@ -31,7 +31,7 @@ Hard-won operational knowledge is captured in `reference/`: a per-endpoint param
 ## Setup
 
 ```bash
-git clone https://github.com/<you>/image-forge ~/.agents/skills/image-forge
+git clone https://github.com/x-rush/image-forge ~/.agents/skills/image-forge
 
 # Provider auth — pick one or both:
 export FAL_KEY="..."                          # https://fal.ai/dashboard/keys
@@ -63,7 +63,7 @@ node ~/.agents/skills/image-forge/scripts/budget.mjs --check
 
 ## Companion skill
 
-**[photo-retouch](https://github.com/<you>/photo-retouch)** — a portrait-retouching methodology pack built on image-forge: exhaustive pre-flight analysis worksheet, single-shot generation discipline, an 8-point identity-anchor checklist, and an element keep/remove judgment framework.
+**[photo-retouch](https://github.com/x-rush/photo-retouch)** — a portrait-retouching methodology pack built on image-forge: exhaustive pre-flight analysis worksheet, single-shot generation discipline, an 8-point identity-anchor checklist, and an element keep/remove judgment framework.
 
 ## License
 
