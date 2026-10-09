@@ -8,7 +8,7 @@
 | --- | --- | --- | --- |
 | E1 | 编辑必须走 `/edit` 端点 | fal 把各族编辑拆成独立端点，老统一端点**静默忽略 image_urls**→凭空文生图出陌生人（nb2、gpt-image-2 均踩过） | 脚本 EDIT_MAP 已自动路由；新增模型先 422 探测确认端点结构 |
 | E2 | 编辑请求体保持最小 | 多余参数（aspect_ratio/num_images 等）疑似触发整幅重绘 | 只发 `prompt + image_urls`（+ openai 质量档） |
-| E3 | 验证"原地编辑"要量化 | 目测不可靠 | ffmpeg SSIM 输入 vs 输出：>0.9 原地 / 0.7-0.8 中度重绘 / ~0.5 整幅重绘 |
+| E3 | 验证"原地编辑"要量化 | 目测不可靠 | ffmpeg SSIM 输入 vs 输出：>0.9 原地 / 0.7-0.8 中度重绘 / ~0.5 整幅重绘（分通道基准见 models.json 的 edit_ssim_verified）|
 | E4 | 画幅判断必须看 EXIF 方向 | iPhone 竖拍物理存储是横幅+rotation 标记，ffprobe 的 w/h 不含方向→把竖片当横片 | 脚本 readImageSize 已解析 orientation 5-8；先怀疑工具链再怀疑模型 |
 | E5 | 编辑可能漂移身份 | 生成式编辑的本性 | 不变量块逐条复述+每轮人审；写实精修用 SSIM 0.95+ 的模型 |
 
@@ -28,7 +28,7 @@
 | --- | --- | --- |
 | M1 | grok 实际返回 JPEG（魔数与扩展名不符） | 脚本已按魔数纠正；下游处理别按 PNG 假设 |
 | M2 | gpt-image-2 不支持 transparent background（422） | 透明底走白底生成+cutout 抠图（全模型通用） |
-| M3 | nb2（已删）编辑=整幅重绘，只配插画 | 写实精修用 nb21/grok2/flare |
+| M3 | （历史，模型已下架）旧版 nano-banana 编辑=整幅重绘 | 迭代模型行为会变化——换代后必须重跑 SSIM 基准 |
 | M4 | 大面积场景替换会让 SSIM 对原图失真（0.4x） | SSIM 低≠事故；按区域人工复核是否"只改了该改的" |
 
 ## 双通道类（fal vs Replicate）

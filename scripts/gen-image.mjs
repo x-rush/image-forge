@@ -74,6 +74,7 @@ function usage(msg) {
   --seed N       仅 google：复现实验
   --out 路径     输出文件，默认 samples/<时间戳>.png
   --n 数量       生成张数，默认 1
+  --provider P   通道 fal|replicate（默认自动选该模型可用通道）
   --intent       参数决策模式：配合 --describe 输出建议参数后退出（不生图）
   --describe 描述 需求的自然语言描述（--intent 时必填）
   --report       查看生图账单后退出（不生图）`);
