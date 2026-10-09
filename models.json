@@ -94,7 +94,7 @@
             ]
           },
           "price_usd": null,
-          "price_note": "see replicate.com/google/nano-banana-2.1",
+          "price_note": "Replicate 按 GPU 运行时长计费（不公开按张价）。参考基准（官方 API 直连价）：nb21 ≈$0.034-0.04/1K；OpenAI 系 quality=high ≈$0.05-0.16/张按档。精确到账请查 replicate.com 账单页。",
           "edit_ssim_verified": 0.174,
           "verified_date": "2026-10-09"
         }
@@ -174,7 +174,7 @@
             "output_format": null
           },
           "price_usd": null,
-          "price_note": "see replicate.com/xai/grok-imagine-image",
+          "price_note": "Replicate 按 GPU 运行时长计费（不公开按张价）。参考基准（官方 API 直连价）：nb21 ≈$0.034-0.04/1K；OpenAI 系 quality=high ≈$0.05-0.16/张按档。精确到账请查 replicate.com 账单页。",
           "edit_ssim_verified": 0.951,
           "verified_date": "2026-10-09"
         }
@@ -251,7 +251,7 @@
             ]
           },
           "price_usd": null,
-          "price_note": "token-based, see replicate.com/openai/gpt-image-2",
+          "price_note": "Replicate 按 GPU 运行时长计费（不公开按张价）。参考基准（官方 API 直连价）：nb21 ≈$0.034-0.04/1K；OpenAI 系 quality=high ≈$0.05-0.16/张按档。精确到账请查 replicate.com 账单页。",
           "edit_ssim_verified": 0.077,
           "verified_date": "2026-10-09"
         }
@@ -339,7 +339,7 @@
             ]
           },
           "price_usd": null,
-          "price_note": "token-based, see replicate.com/openai/gpt-image-2.5-flare",
+          "price_note": "Replicate 按 GPU 运行时长计费（不公开按张价）。参考基准（官方 API 直连价）：nb21 ≈$0.034-0.04/1K；OpenAI 系 quality=high ≈$0.05-0.16/张按档。精确到账请查 replicate.com 账单页。",
           "edit_ssim_verified": 0.169,
           "verified_date": "2026-10-09"
         }
@@ -427,7 +427,7 @@
             ]
           },
           "price_usd": null,
-          "price_note": "same pricing as Flare",
+          "price_note": "Replicate 按 GPU 运行时长计费（不公开按张价）。参考基准（官方 API 直连价）：nb21 ≈$0.034-0.04/1K；OpenAI 系 quality=high ≈$0.05-0.16/张按档。精确到账请查 replicate.com 账单页。",
           "edit_ssim_verified": 0.183,
           "verified_date": "2026-10-09"
         }
