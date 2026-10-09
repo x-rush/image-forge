@@ -34,11 +34,25 @@ function loadProvider(name) {
   return import(pathToFileURL(join(SKILL_DIR, 'providers', `${name}.mjs`)).href);
 }
 
-function resolveModel(alias, hasImage) {
+function resolveModel(alias, hasImage, providerWanted) {
   const m = REGISTRY.models[alias];
   if (!m) return null;
-  if (hasImage && !m.edit_endpoint) return { ...m, alias, error: `模型 ${alias} 无编辑端点` };
-  return { ...m, alias, endpoint: hasImage ? m.edit_endpoint : m.endpoint, isEdit: hasImage };
+  const avail = m.availability || {};
+  let channels = Object.keys(avail);
+  if (providerWanted) {
+    if (!avail[providerWanted]) {
+      return { alias, error: `模型 ${alias} 在 ${providerWanted} 上不可用（可用通道: ${channels.join(', ') || '无'}）` };
+    }
+    channels = [providerWanted];
+  }
+  if (!channels.length) return { alias, error: `模型 ${alias} 无任何可用通道` };
+  const ch = channels[0];
+  const cfg = avail[ch];
+  if (hasImage && !cfg.edit_endpoint && !cfg.edit_via && !cfg.slug) {
+    return { alias, error: `模型 ${alias} 在 ${ch} 上无编辑端点` };
+  }
+  return { ...m, alias, provider: ch, channelCfg: cfg, isEdit: hasImage,
+    endpoint: ch === 'fal' ? (hasImage ? cfg.edit_endpoint : cfg.endpoint) : cfg.slug };
 }
 
 const MIME = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
@@ -71,6 +85,7 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     const k = argv[i];
     if (k === '--model') { a.model = argv[++i]; a.given.add('model'); }
+    else if (k === '--provider') { a.provider = argv[++i]; a.given.add('provider'); }
     else if (k === '--quality') { a.quality = argv[++i]; a.given.add('quality'); }
     else if (k === '--prompt') a.prompt = argv[++i];
     else if (k === '--size') { a.size = argv[++i]; a.given.add('size'); }
@@ -184,25 +199,41 @@ function readImageSize(p) {
 }
 
 function buildParams(a, w, h, m) {
-  const P = m.params || {};
+  const cfg = m.channelCfg || {};
+  const P = cfg.params || {};
+  const style = cfg.param_style || '';
   const want = (k) => a.given.has(k);
   const p = {};
 
-  if (m.isEdit) return p; // 编辑最小体：prompt+image_urls 由 provider 组装
-
-  // 画幅/分辨率：t2i 按 --size 推导注册表枚举
-  if (P.aspect_ratios) {
-    p.aspect_ratio = (want('aspect') && a.aspect) || nearestAspect(w / h, P.aspect_ratios.includes('auto') ? P.aspect_ratios : [...P.aspect_ratios, 'auto']);
-  } else if (P.image_sizes) {
-    p.image_size = OPENAI_SIZES.includes(a.size) ? a.size : nearestOaiSize(w, h);
+  if (m.isEdit) {
+    // 编辑最小体，唯一例外：Replicate nb21 不显式传画幅会用默认值（不跟随输入图）
+    if (style === 'replicate-nb21' && P.aspect_ratios?.includes('match_input_image')) {
+      p.aspect_ratio = 'match_input_image';
+    }
+    return p;
   }
+
+  // 画幅：按通道枚举推导
+  if (P.aspect_ratios) p.aspect_ratio = (want('aspect') && a.aspect) || nearestAspect(w / h, P.aspect_ratios);
+  else if (P.image_sizes) p.image_size = OPENAI_SIZES.includes(a.size) ? a.size : nearestOaiSize(w, h);
+  else if (style.startsWith('replicate-openai')) p.aspect_ratio = nearestAspect(w / h, ['1:1', '3:2', '2:3', '4:3', '3:4', '16:9', '9:16']);
+
+  // 分辨率
   if (P.resolutions) p.resolution = (want('resolution') && a.resolution) || P.resolutions[0];
-  if (P.seed && want('seed')) p.seed = a.seed;
+  // 数量
   if (a.n > 1) p.num_images = a.n;
-  if (want('format')) p.output_format = a.format;
+  // 种子（仅注册表声明支持的通道）
+  if (P.seed && want('seed')) p.seed = a.seed;
+  // 背景（仅声明支持；replicate-openai 枚举里有 transparent）
   if (P.background && want('background')) p.background = a.background;
-  if (P.output_compression && want('compression')) p.output_compression = a.compression;
-  if (want('quality')) p.quality = a.quality;
+  if (want('compression')) p.output_compression = a.compression;
+  // 格式：通道词表归一（fal 用 jpeg，replicate-openai 用 jpeg/jpeg 均可，nb21 用 jpg）
+  if (want('format')) {
+    const list = P.output_format || [];
+    p.output_format = list.includes(a.format) ? a.format : (list.includes(a.format.replace('jpeg','jpg')) ? a.format.replace('jpeg','jpg') : a.format);
+  }
+  // 质量档
+  if (P.quality && want('quality')) p.quality = a.quality;
   else if (P.default_quality) p.quality = P.default_quality;
   return p;
 }
@@ -235,16 +266,18 @@ async function main() {
   const [w, h] = (a.size.includes('x') ? a.size : '1024x1024').split('x').map(Number);
   if (!w || !h) usage(`--size 格式应为 WxH（或 openai 枚举 square/portrait_4_3 等）`);
 
-  const m = resolveModel(a.model, !!a.image);
+  const m = resolveModel(a.model, !!a.image, a.provider);
   if (!m) usage(`--model 必须是 ${Object.keys(REGISTRY.models).join('|')}（见 models.json）`);
   if (m.error) { console.error('错误: ' + m.error); process.exit(1); }
+  if (a.provider && a.provider !== m.provider) { /* 不可达，resolveModel 已拦截 */ }
   if (a.image) {
     const dim = readImageSize(resolve(a.image));
     if (dim) { a.inW = dim.w; a.inH = dim.h; }
   }
   const params = buildParams(a, w, h, m);
   const provider = await loadProvider(m.provider);
-  const apiKey = process.env[REGISTRY.providers[m.provider].auth_env]
+  const authEnv = REGISTRY.providers[m.provider].auth_env;
+  const apiKey = process.env[authEnv]
     ?? (m.provider === 'replicate' ? (await loadProvider('replicate')).resolveToken() : undefined);
   const t0 = Date.now();
   let images;

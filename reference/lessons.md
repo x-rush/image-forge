@@ -30,3 +30,10 @@
 | M2 | gpt-image-2 不支持 transparent background（422） | 透明底走白底生成+cutout 抠图（全模型通用） |
 | M3 | nb2（已删）编辑=整幅重绘，只配插画 | 写实精修用 nb21/grok2/flare |
 | M4 | 大面积场景替换会让 SSIM 对原图失真（0.4x） | SSIM 低≠事故；按区域人工复核是否"只改了该改的" |
+
+## 双通道类（fal vs Replicate）
+
+| # | 教训 | 正确做法 |
+| --- | --- | --- |
+| C1 | 同一模型在不同平台的托管形态不同：fal 的 nb21/edit 是对话式编辑端点（原地改，SSIM 0.83）；Replicate 的 nb21 是单文件模型，编辑=整幅重绘倾向（SSIM 0.20，场景/光线全换），参数（match_input_image）只能保画幅保不了场景 | 写实精修类编辑认准 fal /edit 通道；Replicate 通道适合文生图和"重新构想"类编辑；跨通道对比时 SSIM 是唯一客观裁判（2026-10-09 A/B 实测） |
+| C2 | Replicate 是异步预测 API（create→poll→fetch），与 fal 同步 REST 完全不同 | providers/replicate.mjs 已实现轮询；token 配置见该文件头（环境变量或 token.txt） |

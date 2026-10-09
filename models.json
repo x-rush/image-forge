@@ -1,267 +1,413 @@
 {
-  "$comment": "Model registry for image-forge. Providers implement providers/*.mjs; adding a model = add a JSON entry, no code changes. price_usd is per 1K image, edit_extra_usd is the per-input-image surcharge.",
+  "$comment": "image-forge model registry. MODELS ARE THE FIXED LIST (user-mandated five); providers are channels - a model may be sold on one or both. Each model's availability maps channel -> channel-specific config (endpoint slug + param enums), probed from live schemas 2026-10-09. Prices: fal = per image (verified from pricingInfoOverride); replicate = per-output image from model page where published, else null (=check web). Adding a channel/model = edit this JSON only.",
   "default_provider": "fal",
   "providers": {
     "fal": {
-      "description": "fal.ai gateway (sync REST, per-image billing)",
+      "description": "fal.ai gateway (sync REST, POST fal.run/<endpoint>)",
       "auth_env": "FAL_KEY",
       "docs": "https://fal.ai"
     },
     "replicate": {
-      "description": "Replicate (async prediction API)",
+      "description": "Replicate (async predictions, POST /v1/models/<slug>/predictions + poll)",
       "auth_env": "REPLICATE_API_TOKEN",
       "docs": "https://replicate.com/docs",
-      "setup": "See providers/replicate.mjs header — token file or env var"
+      "setup": "Env var REPLICATE_API_TOKEN, or providers/token.txt (gitignored)"
     }
   },
   "models": {
     "nb21": {
-      "provider": "fal",
       "vendor": "Google",
       "model": "Nano Banana 2.1",
-      "endpoint": "google/nano-banana-2.1",
-      "edit_endpoint": "google/nano-banana-2.1/edit",
-      "best_for": "photo retouching / in-place editing (SSIM 0.97, highest)",
-      "params": {
-        "aspect_ratios": [
-          "21:9",
-          "16:9",
-          "3:2",
-          "4:3",
-          "5:4",
-          "1:1",
-          "4:5",
-          "3:4",
-          "2:3",
-          "9:16",
-          "4:1",
-          "1:4"
-        ],
-        "resolutions": [
-          "1K",
-          "2K",
-          "4K"
-        ],
-        "seed": true,
-        "quality": null,
-        "background": false,
-        "output_format": [
-          "jpeg",
-          "png",
-          "webp"
-        ]
-      },
-      "price_usd": 0.08,
-      "price_multiplier_by_resolution": {
-        "2K": 1.5,
-        "4K": 2
+      "best_for": "photo retouching / in-place editing (highest identity retention)",
+      "identity_anchors": "verified on fal 2026-10-06 (SSIM 0.97)",
+      "availability": {
+        "fal": {
+          "endpoint": "google/nano-banana-2.1",
+          "edit_endpoint": "google/nano-banana-2.1/edit",
+          "param_style": "fal-nb21",
+          "params": {
+            "aspect_ratios": [
+              "21:9",
+              "16:9",
+              "3:2",
+              "4:3",
+              "5:4",
+              "1:1",
+              "4:5",
+              "3:4",
+              "2:3",
+              "9:16",
+              "4:1",
+              "1:4"
+            ],
+            "resolutions": [
+              "1K",
+              "2K",
+              "4K"
+            ],
+            "seed": true,
+            "output_format": [
+              "jpeg",
+              "png",
+              "webp"
+            ]
+          },
+          "price_usd": 0.08,
+          "price_multiplier_by_resolution": {
+            "2K": 1.5,
+            "4K": 2
+          }
+        },
+        "replicate": {
+          "slug": "google/nano-banana-2.1",
+          "edit_via": "image_input (same model, conversational edit)",
+          "param_style": "replicate-nb21",
+          "edit_behavior": "VERIFIED 2026-10-09: t2i OK (14.5s); edit repaints the whole scene despite aspect_ratio=match_input_image (A/B vs fal: SSIM 0.20 vs 0.83, scene/plants/light all regenerated). VERDICT: use fal channel for photo retouching; replicate channel fine for t2i and 're-imagined edits'.",
+          "params": {
+            "aspect_ratios": [
+              "match_input_image",
+              "1:1",
+              "1:4",
+              "1:8",
+              "2:3",
+              "3:2",
+              "3:4",
+              "4:1",
+              "4:3",
+              "4:5",
+              "5:4",
+              "8:1",
+              "9:16",
+              "16:9",
+              "21:9"
+            ],
+            "resolutions": [
+              "1K",
+              "2K",
+              "4K"
+            ],
+            "output_format": [
+              "jpg",
+              "png"
+            ]
+          },
+          "price_usd": null,
+          "price_note": "see replicate.com/google/nano-banana-2.1"
+        }
       }
     },
     "grok2": {
-      "provider": "fal",
       "vendor": "xAI",
-      "model": "Grok Imagine Image 2.0",
-      "endpoint": "xai/grok-imagine-image/v2.0/text-to-image",
-      "edit_endpoint": "xai/grok-imagine-image/v2.0/edit",
+      "model": "Grok Imagine Image",
       "best_for": "fast iteration, T2I workhorse",
-      "params": {
-        "aspect_ratios": [
-          "2:1",
-          "20:9",
-          "19.5:9",
-          "16:9",
-          "4:3",
-          "3:2",
-          "1:1",
-          "2:3",
-          "3:4",
-          "9:16",
-          "9:19.5",
-          "9:20"
-        ],
-        "resolutions": [
-          "1k",
-          "2k"
-        ],
-        "seed": false,
-        "quality": [
-          "low",
-          "medium"
-        ],
-        "background": false,
-        "output_format": [
-          "jpeg",
-          "png",
-          "webp"
-        ]
-      },
-      "price_usd": 0.06,
-      "price_low_usd": 0.04,
-      "price_multiplier_by_resolution": {
-        "2k": 1.4
-      },
-      "edit_extra_usd": 0.01
+      "identity_anchors": "edit verified on fal 2026-10-06 (SSIM 0.96)",
+      "availability": {
+        "fal": {
+          "endpoint": "xai/grok-imagine-image/v2.0/text-to-image",
+          "edit_endpoint": "xai/grok-imagine-image/v2.0/edit",
+          "param_style": "fal-grok2",
+          "params": {
+            "aspect_ratios": [
+              "2:1",
+              "20:9",
+              "19.5:9",
+              "16:9",
+              "4:3",
+              "3:2",
+              "1:1",
+              "2:3",
+              "3:4",
+              "9:16",
+              "9:19.5",
+              "9:20"
+            ],
+            "resolutions": [
+              "1k",
+              "2k"
+            ],
+            "quality": [
+              "low",
+              "medium"
+            ],
+            "output_format": [
+              "jpeg",
+              "png",
+              "webp"
+            ]
+          },
+          "price_usd": 0.06,
+          "price_low_usd": 0.04,
+          "price_multiplier_by_resolution": {
+            "2k": 1.4
+          },
+          "edit_extra_usd": 0.01
+        },
+        "replicate": {
+          "slug": "xai/grok-imagine-image",
+          "edit_via": "image input",
+          "param_style": "replicate-grok2",
+          "params": {
+            "aspect_ratios": [
+              "1:1",
+              "16:9",
+              "9:16",
+              "4:3",
+              "3:4",
+              "3:2",
+              "2:3",
+              "2:1",
+              "1:2",
+              "19.5:9",
+              "9:19.5",
+              "20:9",
+              "9:20",
+              "auto"
+            ],
+            "quality": null,
+            "output_format": null
+          },
+          "price_usd": null,
+          "price_note": "see replicate.com/xai/grok-imagine-image"
+        }
+      }
     },
     "gpt2": {
-      "provider": "fal",
       "vendor": "OpenAI",
       "model": "GPT Image 2",
-      "endpoint": "openai/gpt-image-2",
-      "edit_endpoint": "openai/gpt-image-2/edit",
-      "best_for": "images containing lots of text",
-      "params": {
-        "image_sizes": [
-          "square_hd",
-          "square",
-          "portrait_4_3",
-          "portrait_16_9",
-          "landscape_4_3",
-          "landscape_16_9",
-          "auto"
-        ],
-        "seed": false,
-        "quality": [
-          "auto",
-          "low",
-          "medium",
-          "high"
-        ],
-        "background": false,
-        "output_format": [
-          "jpeg",
-          "png",
-          "webp"
-        ]
-      },
-      "price_usd": 0.16
+      "best_for": "images containing heavy text; transparent background",
+      "identity_anchors": "edit verified on fal 2026-10-06 (SSIM 0.75, moderate repaint)",
+      "availability": {
+        "fal": {
+          "endpoint": "openai/gpt-image-2",
+          "edit_endpoint": "openai/gpt-image-2/edit",
+          "param_style": "fal-openai",
+          "params": {
+            "image_sizes": [
+              "square_hd",
+              "square",
+              "portrait_4_3",
+              "portrait_16_9",
+              "landscape_4_3",
+              "landscape_16_9",
+              "auto"
+            ],
+            "quality": [
+              "auto",
+              "low",
+              "medium",
+              "high"
+            ],
+            "background": false,
+            "output_format": [
+              "jpeg",
+              "png",
+              "webp"
+            ]
+          },
+          "price_usd": 0.16
+        },
+        "replicate": {
+          "slug": "openai/gpt-image-2",
+          "edit_via": "input_images",
+          "param_style": "replicate-openai",
+          "params": {
+            "aspect_ratios": [
+              "1:1",
+              "3:2",
+              "2:3",
+              "4:3",
+              "3:4",
+              "16:9",
+              "9:16",
+              "auto"
+            ],
+            "quality": [
+              "auto",
+              "low",
+              "medium",
+              "high"
+            ],
+            "background": [
+              "auto",
+              "transparent",
+              "opaque"
+            ],
+            "output_format": [
+              "png",
+              "jpeg",
+              "webp"
+            ]
+          },
+          "price_usd": null,
+          "price_note": "token-based, see replicate.com/openai/gpt-image-2"
+        }
+      }
     },
     "flare": {
-      "provider": "fal",
       "vendor": "OpenAI",
       "model": "GPT Image 2.5 Flare",
-      "endpoint": "openai/gpt-image-2.5/flare/text-to-image",
-      "edit_endpoint": "openai/gpt-image-2.5/flare/edit",
       "best_for": "premium quality edits (SSIM 0.95 high)",
-      "params": {
-        "image_sizes": [
-          "square_hd",
-          "square",
-          "portrait_4_3",
-          "portrait_16_9",
-          "landscape_4_3",
-          "landscape_16_9",
-          "auto"
-        ],
-        "seed": false,
-        "quality": [
-          "auto",
-          "low",
-          "medium",
-          "high",
-          "xhigh",
-          "max"
-        ],
-        "default_quality": "max",
-        "background": [
-          "auto",
-          "transparent",
-          "opaque"
-        ],
-        "output_format": [
-          "jpeg",
-          "png",
-          "webp"
-        ],
-        "output_compression": true
-      },
-      "price_usd": 0.16
+      "identity_anchors": "edit verified on fal 2026-10-06 (high 0.95 / max 0.90)",
+      "availability": {
+        "fal": {
+          "endpoint": "openai/gpt-image-2.5/flare/text-to-image",
+          "edit_endpoint": "openai/gpt-image-2.5/flare/edit",
+          "param_style": "fal-openai25",
+          "params": {
+            "image_sizes": [
+              "square_hd",
+              "square",
+              "portrait_4_3",
+              "portrait_16_9",
+              "landscape_4_3",
+              "landscape_16_9",
+              "auto"
+            ],
+            "quality": [
+              "auto",
+              "low",
+              "medium",
+              "high",
+              "xhigh",
+              "max"
+            ],
+            "default_quality": "max",
+            "background": [
+              "auto",
+              "transparent",
+              "opaque"
+            ],
+            "output_format": [
+              "jpeg",
+              "png",
+              "webp"
+            ],
+            "output_compression": true
+          },
+          "price_usd": 0.16
+        },
+        "replicate": {
+          "slug": "openai/gpt-image-2.5-flare",
+          "edit_via": "input_images",
+          "param_style": "replicate-openai",
+          "params": {
+            "aspect_ratios": [
+              "1:1",
+              "3:2",
+              "2:3",
+              "4:3",
+              "3:4",
+              "16:9",
+              "9:16",
+              "auto"
+            ],
+            "quality": [
+              "auto",
+              "low",
+              "medium",
+              "high",
+              "xhigh",
+              "max"
+            ],
+            "default_quality": null,
+            "background": [
+              "auto",
+              "transparent",
+              "opaque"
+            ],
+            "output_format": [
+              "png",
+              "jpeg",
+              "webp"
+            ]
+          },
+          "price_usd": null,
+          "price_note": "token-based, see replicate.com/openai/gpt-image-2.5-flare"
+        }
+      }
     },
     "sunburst": {
-      "provider": "fal",
       "vendor": "OpenAI",
       "model": "GPT Image 2.5 Sunburst",
-      "endpoint": "openai/gpt-image-2.5/sunburst/text-to-image",
-      "edit_endpoint": "openai/gpt-image-2.5/sunburst/edit",
       "best_for": "2.5 quality tier",
-      "params": {
-        "image_sizes": [
-          "square_hd",
-          "square",
-          "portrait_4_3",
-          "portrait_16_9",
-          "landscape_4_3",
-          "landscape_16_9",
-          "auto"
-        ],
-        "seed": false,
-        "quality": [
-          "auto",
-          "low",
-          "medium",
-          "high",
-          "xhigh",
-          "max"
-        ],
-        "default_quality": "max",
-        "background": [
-          "auto",
-          "transparent",
-          "opaque"
-        ],
-        "output_format": [
-          "jpeg",
-          "png",
-          "webp"
-        ],
-        "output_compression": true
-      },
-      "price_usd": 0.16
-    },
-    "flux-schnell": {
-      "provider": "replicate",
-      "vendor": "Black Forest Labs",
-      "model": "FLUX.1 [schnell]",
-      "endpoint": "black-forest-labs/flux-schnell",
-      "edit_endpoint": null,
-      "best_for": "fastest T2I on replicate (~1s)",
-      "params": {
-        "aspect_ratios": [
-          "1:1",
-          "16:9",
-          "9:16",
-          "4:3",
-          "3:2"
-        ],
-        "output_format": [
-          "webp",
-          "jpg",
-          "png"
-        ]
-      },
-      "price_usd": 0.003
-    },
-    "flux-dev": {
-      "provider": "replicate",
-      "vendor": "Black Forest Labs",
-      "model": "FLUX.1 [dev]",
-      "endpoint": "black-forest-labs/flux-dev",
-      "edit_endpoint": "black-forest-labs/flux-kontext-dev",
-      "best_for": "higher quality T2I + instruction editing",
-      "params": {
-        "aspect_ratios": [
-          "1:1",
-          "16:9",
-          "9:16",
-          "4:3",
-          "3:2"
-        ],
-        "output_format": [
-          "webp",
-          "jpg",
-          "png"
-        ]
-      },
-      "price_usd": 0.025
+      "identity_anchors": "not yet run on either channel",
+      "availability": {
+        "fal": {
+          "endpoint": "openai/gpt-image-2.5/sunburst/text-to-image",
+          "edit_endpoint": "openai/gpt-image-2.5/sunburst/edit",
+          "param_style": "fal-openai25",
+          "params": {
+            "image_sizes": [
+              "square_hd",
+              "square",
+              "portrait_4_3",
+              "portrait_16_9",
+              "landscape_4_3",
+              "landscape_16_9",
+              "auto"
+            ],
+            "quality": [
+              "auto",
+              "low",
+              "medium",
+              "high",
+              "xhigh",
+              "max"
+            ],
+            "default_quality": "max",
+            "background": [
+              "auto",
+              "transparent",
+              "opaque"
+            ],
+            "output_format": [
+              "jpeg",
+              "png",
+              "webp"
+            ],
+            "output_compression": true
+          },
+          "price_usd": 0.16
+        },
+        "replicate": {
+          "slug": "openai/gpt-image-2.5-sunburst",
+          "edit_via": "input_images",
+          "param_style": "replicate-openai",
+          "params": {
+            "aspect_ratios": [
+              "1:1",
+              "3:2",
+              "2:3",
+              "4:3",
+              "3:4",
+              "16:9",
+              "9:16",
+              "auto"
+            ],
+            "quality": [
+              "auto",
+              "low",
+              "medium",
+              "high",
+              "xhigh",
+              "max"
+            ],
+            "default_quality": null,
+            "background": [
+              "auto",
+              "transparent",
+              "opaque"
+            ],
+            "output_format": [
+              "png",
+              "jpeg",
+              "webp"
+            ]
+          },
+          "price_usd": null,
+          "price_note": "same pricing as Flare"
+        }
+      }
     }
   }
 }
