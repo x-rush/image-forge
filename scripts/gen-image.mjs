@@ -74,6 +74,8 @@ function usage(msg) {
   --seed N       仅 google：复现实验
   --out 路径     输出文件，默认 samples/<时间戳>.png
   --n 数量       生成张数，默认 1
+  --intent       参数决策模式：配合 --describe 输出建议参数后退出（不生图）
+  --describe 描述 需求的自然语言描述（--intent 时必填）
   --report       查看生图账单后退出（不生图）`);
   process.exit(1);
 }
@@ -86,6 +88,8 @@ function parseArgs(argv) {
     const k = argv[i];
     if (k === '--model') { a.model = argv[++i]; a.given.add('model'); }
     else if (k === '--provider') { a.provider = argv[++i]; a.given.add('provider'); }
+    else if (k === '--intent') { a.intent = true; }
+    else if (k === '--describe') a.describe = argv[++i];
     else if (k === '--quality') { a.quality = argv[++i]; a.given.add('quality'); }
     else if (k === '--prompt') a.prompt = argv[++i];
     else if (k === '--size') { a.size = argv[++i]; a.given.add('size'); }
@@ -102,6 +106,24 @@ function parseArgs(argv) {
     else usage('未知参数 ' + k);
   }
   if (a.report) return a;
+  if (a.intent) {
+    const d = argv[argv.indexOf('--describe') + 1] || '';
+    if (!d) { console.error('错误: --intent 需要 --describe \"需求描述\"'); process.exit(1); }
+    // 机械可读输出：agent 读此 JSON 按 reference/decision-tree.md 做最终决策并组装提示词
+    console.log(JSON.stringify({
+      describe: d,
+      registry_models: Object.keys(REGISTRY.models),
+      channel_matrix: Object.fromEntries(Object.entries(REGISTRY.models).map(([k, m]) => [k, {
+        channels: Object.keys(m.availability || {}),
+        best_for: m.best_for,
+        prices: Object.fromEntries(Object.entries(m.availability || {}).map(([ch, c]) => [ch, c.price_usd])),
+        param_enums: Object.fromEntries(Object.entries(m.availability || {}).map(([ch, c]) => [ch, c.params])),
+      }])),
+      decision_rules: 'see reference/decision-tree.md',
+      note: 'agent 按 decision-tree.md 从上述枚举中选择参数，然后以普通参数重新调用本脚本生成',
+    }, null, 2));
+    return;
+  }
   if (!a.model || !REGISTRY.models[a.model]) usage(`--model 必须是 ${Object.keys(REGISTRY.models).join('|')}（见 models.json）`);
   if (!a.prompt) usage('--prompt 必填');
   return a;

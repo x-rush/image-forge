@@ -56,7 +56,9 @@
           "price_multiplier_by_resolution": {
             "2K": 1.5,
             "4K": 2
-          }
+          },
+          "edit_ssim_verified": 0.975,
+          "verified_date": "2026-10-09"
         },
         "replicate": {
           "slug": "google/nano-banana-2.1",
@@ -92,9 +94,12 @@
             ]
           },
           "price_usd": null,
-          "price_note": "see replicate.com/google/nano-banana-2.1"
+          "price_note": "see replicate.com/google/nano-banana-2.1",
+          "edit_ssim_verified": 0.174,
+          "verified_date": "2026-10-09"
         }
-      }
+      },
+      "best_edit_channel": "fal"
     },
     "grok2": {
       "vendor": "xAI",
@@ -140,7 +145,9 @@
           "price_multiplier_by_resolution": {
             "2k": 1.4
           },
-          "edit_extra_usd": 0.01
+          "edit_extra_usd": 0.01,
+          "edit_ssim_verified": 0.746,
+          "verified_date": "2026-10-09"
         },
         "replicate": {
           "slug": "xai/grok-imagine-image",
@@ -167,9 +174,12 @@
             "output_format": null
           },
           "price_usd": null,
-          "price_note": "see replicate.com/xai/grok-imagine-image"
+          "price_note": "see replicate.com/xai/grok-imagine-image",
+          "edit_ssim_verified": 0.951,
+          "verified_date": "2026-10-09"
         }
-      }
+      },
+      "best_edit_channel": "replicate"
     },
     "gpt2": {
       "vendor": "OpenAI",
@@ -204,7 +214,9 @@
               "webp"
             ]
           },
-          "price_usd": 0.16
+          "price_usd": 0.16,
+          "edit_ssim_verified": 0.21,
+          "verified_date": "2026-10-09"
         },
         "replicate": {
           "slug": "openai/gpt-image-2",
@@ -239,9 +251,12 @@
             ]
           },
           "price_usd": null,
-          "price_note": "token-based, see replicate.com/openai/gpt-image-2"
+          "price_note": "token-based, see replicate.com/openai/gpt-image-2",
+          "edit_ssim_verified": 0.077,
+          "verified_date": "2026-10-09"
         }
-      }
+      },
+      "best_edit_channel": "fal"
     },
     "flare": {
       "vendor": "OpenAI",
@@ -284,7 +299,9 @@
             ],
             "output_compression": true
           },
-          "price_usd": 0.16
+          "price_usd": 0.16,
+          "edit_ssim_verified": 0.919,
+          "verified_date": "2026-10-09"
         },
         "replicate": {
           "slug": "openai/gpt-image-2.5-flare",
@@ -322,9 +339,12 @@
             ]
           },
           "price_usd": null,
-          "price_note": "token-based, see replicate.com/openai/gpt-image-2.5-flare"
+          "price_note": "token-based, see replicate.com/openai/gpt-image-2.5-flare",
+          "edit_ssim_verified": 0.169,
+          "verified_date": "2026-10-09"
         }
-      }
+      },
+      "best_edit_channel": "fal"
     },
     "sunburst": {
       "vendor": "OpenAI",
@@ -367,7 +387,9 @@
             ],
             "output_compression": true
           },
-          "price_usd": 0.16
+          "price_usd": 0.16,
+          "edit_ssim_verified": 0.969,
+          "verified_date": "2026-10-09"
         },
         "replicate": {
           "slug": "openai/gpt-image-2.5-sunburst",
@@ -405,9 +427,12 @@
             ]
           },
           "price_usd": null,
-          "price_note": "same pricing as Flare"
+          "price_note": "same pricing as Flare",
+          "edit_ssim_verified": 0.183,
+          "verified_date": "2026-10-09"
         }
-      }
+      },
+      "best_edit_channel": "fal"
     }
   }
 }
