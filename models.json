@@ -1,0 +1,267 @@
+{
+  "$comment": "Model registry for image-forge. Providers implement providers/*.mjs; adding a model = add a JSON entry, no code changes. price_usd is per 1K image, edit_extra_usd is the per-input-image surcharge.",
+  "default_provider": "fal",
+  "providers": {
+    "fal": {
+      "description": "fal.ai gateway (sync REST, per-image billing)",
+      "auth_env": "FAL_KEY",
+      "docs": "https://fal.ai"
+    },
+    "replicate": {
+      "description": "Replicate (async prediction API)",
+      "auth_env": "REPLICATE_API_TOKEN",
+      "docs": "https://replicate.com/docs",
+      "setup": "See providers/replicate.mjs header — token file or env var"
+    }
+  },
+  "models": {
+    "nb21": {
+      "provider": "fal",
+      "vendor": "Google",
+      "model": "Nano Banana 2.1",
+      "endpoint": "google/nano-banana-2.1",
+      "edit_endpoint": "google/nano-banana-2.1/edit",
+      "best_for": "photo retouching / in-place editing (SSIM 0.97, highest)",
+      "params": {
+        "aspect_ratios": [
+          "21:9",
+          "16:9",
+          "3:2",
+          "4:3",
+          "5:4",
+          "1:1",
+          "4:5",
+          "3:4",
+          "2:3",
+          "9:16",
+          "4:1",
+          "1:4"
+        ],
+        "resolutions": [
+          "1K",
+          "2K",
+          "4K"
+        ],
+        "seed": true,
+        "quality": null,
+        "background": false,
+        "output_format": [
+          "jpeg",
+          "png",
+          "webp"
+        ]
+      },
+      "price_usd": 0.08,
+      "price_multiplier_by_resolution": {
+        "2K": 1.5,
+        "4K": 2
+      }
+    },
+    "grok2": {
+      "provider": "fal",
+      "vendor": "xAI",
+      "model": "Grok Imagine Image 2.0",
+      "endpoint": "xai/grok-imagine-image/v2.0/text-to-image",
+      "edit_endpoint": "xai/grok-imagine-image/v2.0/edit",
+      "best_for": "fast iteration, T2I workhorse",
+      "params": {
+        "aspect_ratios": [
+          "2:1",
+          "20:9",
+          "19.5:9",
+          "16:9",
+          "4:3",
+          "3:2",
+          "1:1",
+          "2:3",
+          "3:4",
+          "9:16",
+          "9:19.5",
+          "9:20"
+        ],
+        "resolutions": [
+          "1k",
+          "2k"
+        ],
+        "seed": false,
+        "quality": [
+          "low",
+          "medium"
+        ],
+        "background": false,
+        "output_format": [
+          "jpeg",
+          "png",
+          "webp"
+        ]
+      },
+      "price_usd": 0.06,
+      "price_low_usd": 0.04,
+      "price_multiplier_by_resolution": {
+        "2k": 1.4
+      },
+      "edit_extra_usd": 0.01
+    },
+    "gpt2": {
+      "provider": "fal",
+      "vendor": "OpenAI",
+      "model": "GPT Image 2",
+      "endpoint": "openai/gpt-image-2",
+      "edit_endpoint": "openai/gpt-image-2/edit",
+      "best_for": "images containing lots of text",
+      "params": {
+        "image_sizes": [
+          "square_hd",
+          "square",
+          "portrait_4_3",
+          "portrait_16_9",
+          "landscape_4_3",
+          "landscape_16_9",
+          "auto"
+        ],
+        "seed": false,
+        "quality": [
+          "auto",
+          "low",
+          "medium",
+          "high"
+        ],
+        "background": false,
+        "output_format": [
+          "jpeg",
+          "png",
+          "webp"
+        ]
+      },
+      "price_usd": 0.16
+    },
+    "flare": {
+      "provider": "fal",
+      "vendor": "OpenAI",
+      "model": "GPT Image 2.5 Flare",
+      "endpoint": "openai/gpt-image-2.5/flare/text-to-image",
+      "edit_endpoint": "openai/gpt-image-2.5/flare/edit",
+      "best_for": "premium quality edits (SSIM 0.95 high)",
+      "params": {
+        "image_sizes": [
+          "square_hd",
+          "square",
+          "portrait_4_3",
+          "portrait_16_9",
+          "landscape_4_3",
+          "landscape_16_9",
+          "auto"
+        ],
+        "seed": false,
+        "quality": [
+          "auto",
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "default_quality": "max",
+        "background": [
+          "auto",
+          "transparent",
+          "opaque"
+        ],
+        "output_format": [
+          "jpeg",
+          "png",
+          "webp"
+        ],
+        "output_compression": true
+      },
+      "price_usd": 0.16
+    },
+    "sunburst": {
+      "provider": "fal",
+      "vendor": "OpenAI",
+      "model": "GPT Image 2.5 Sunburst",
+      "endpoint": "openai/gpt-image-2.5/sunburst/text-to-image",
+      "edit_endpoint": "openai/gpt-image-2.5/sunburst/edit",
+      "best_for": "2.5 quality tier",
+      "params": {
+        "image_sizes": [
+          "square_hd",
+          "square",
+          "portrait_4_3",
+          "portrait_16_9",
+          "landscape_4_3",
+          "landscape_16_9",
+          "auto"
+        ],
+        "seed": false,
+        "quality": [
+          "auto",
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "default_quality": "max",
+        "background": [
+          "auto",
+          "transparent",
+          "opaque"
+        ],
+        "output_format": [
+          "jpeg",
+          "png",
+          "webp"
+        ],
+        "output_compression": true
+      },
+      "price_usd": 0.16
+    },
+    "flux-schnell": {
+      "provider": "replicate",
+      "vendor": "Black Forest Labs",
+      "model": "FLUX.1 [schnell]",
+      "endpoint": "black-forest-labs/flux-schnell",
+      "edit_endpoint": null,
+      "best_for": "fastest T2I on replicate (~1s)",
+      "params": {
+        "aspect_ratios": [
+          "1:1",
+          "16:9",
+          "9:16",
+          "4:3",
+          "3:2"
+        ],
+        "output_format": [
+          "webp",
+          "jpg",
+          "png"
+        ]
+      },
+      "price_usd": 0.003
+    },
+    "flux-dev": {
+      "provider": "replicate",
+      "vendor": "Black Forest Labs",
+      "model": "FLUX.1 [dev]",
+      "endpoint": "black-forest-labs/flux-dev",
+      "edit_endpoint": "black-forest-labs/flux-kontext-dev",
+      "best_for": "higher quality T2I + instruction editing",
+      "params": {
+        "aspect_ratios": [
+          "1:1",
+          "16:9",
+          "9:16",
+          "4:3",
+          "3:2"
+        ],
+        "output_format": [
+          "webp",
+          "jpg",
+          "png"
+        ]
+      },
+      "price_usd": 0.025
+    }
+  }
+}
