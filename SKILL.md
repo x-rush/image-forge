@@ -50,7 +50,7 @@ Every successful generation appends to `scripts/gen-log.jsonl` (global ledger).
 1. **Budget check**: `budget.mjs --check` before the first generation of a session; report the balance.
 2. **Confirm intent** (skip if user already stated all three): ① style ② expected content — include AND exclude ③ count and purpose.
 3. **Model selection**: decision tree in `reference/quality-and-budget.md` (photo retouch → nb21; fast/cheap → grok2; heavy text → gpt2; transparent bg → white-bg + cutout).
-4. **Prompt assembly**: explicit subject block + style block + composition. Hard verbs for removals ("delete/remove all", never "simplify"), every removal paired with a completion plan, positive phrasing only.
+4. **Prompt assembly**: follow `reference/prompting.md` — five-layer T2I structure, edit-instruction patterns (identity-retention phrasing), per-model preferences. Explicit subject block + style block + composition. Hard verbs for removals ("delete/remove all", never "simplify"), every removal paired with a completion plan, positive phrasing only.
 5. **Generate once → visually inspect with Read before delivering.** Retries only after user review; each retry is one prompt → one image → one review.
 
 ## Critical Rules
