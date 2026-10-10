@@ -18,12 +18,12 @@
  *   status: starting → processing → succeeded / failed / canceled
  *   鉴权 Header: Authorization: "Bearer <token>"（注意与 fal 的 "Key" 前缀不同）
  *
- * 参数差异（相对 fal）：无 aspect_ratio 的"19.5:9"类极端档；num_images 叫 num_outputs；
+ * ⚠️ 参数差异（相对 fal）：无 aspect_ratio 的"19.5:9"类极端档；num_images 叫 num_outputs；
  *   输入图字段叫 image（单数，string URL/dataURI）。模型实际 schema 以
  *   https://replicate.com/<owner>/<name>/api/schema 为准，首跑前建议先看一眼。
  *
- * ⚠️ 状态：代码按官方文档实现，尚无真实 token 实测（标注 UNTESTED）。
- *    首次使用请先用便宜模型（flux-schnell $0.003）跑一张验证通路。
+ * 状态：通道已实测（2026-10-09，t2i 与编辑均跑通，SSIM 矩阵见 models.json 各模型
+ *    availability.replicate 段）。注意账户余额 <$5 时创建限速 6 次/分钟（429）。
  */
 
 import { readFileSync, existsSync } from 'node:fs';
