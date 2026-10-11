@@ -8,6 +8,7 @@
 - **为什么改**：同步长连接在代理环境易被掐断且中断后无任务 id 不可恢复；队列提交即得 id，中断 `gen-image --resume <request_id>` 零成本重取（已实测，resume 记账 $0）
 - 队列对图片模型同样有效（[live] flux-schnell/grok2 探测；校验在 worker 层，422 不扣费）
 - 队列命名空间 = 端点前两段（owner/model），resume 据此构造 URL
+- Replicate 图像通道本就是异步（Prefer:wait + 轮询）：已补 prediction id 回显 + resume() 入口
 - 鉴权与 422 探测工艺不变
 
 | 参数 | grok2 (xAI) | nb21 (Google) | gpt2 (OpenAI) | flare/sunburst (OpenAI 2.5) |

@@ -76,6 +76,8 @@ export async function generate({ endpoint, isEdit, prompt, imageUris, params, ap
     throw new Error(`Replicate 创建预测失败 HTTP ${createRes.status}: ${(await createRes.text()).slice(0, 500)}`);
   }
   let pred = await createRes.json();
+  // 提交即回显 id：中断后可凭 id 恢复（resume 入口 / 手动 GET /v1/predictions/<id>）
+  onLog(`prediction_id=${pred.id}`);
 
   // Prefer: wait 最多挂 ~60s；未完成则轮询
   const deadline = Date.now() + timeoutMs;
@@ -99,5 +101,31 @@ export async function generate({ endpoint, isEdit, prompt, imageUris, params, ap
   let urls = Array.isArray(out) ? out : typeof out === 'string' ? [out] : out?.images?.map((i) => (typeof i === 'string' ? i : i.url)) || [];
   if (!urls.length) throw new Error(`Replicate output 无可用图片 URL: ${JSON.stringify(out).slice(0, 300)}`);
   // gen-image.mjs 统一按 url 下载落盘；b64_json 形态 Replicate 不使用
-  return { images: urls.map((u) => ({ url: u })) };
+  return { images: urls.map((u) => ({ url: u })), request_id: pred.id };
+}
+
+// 中断恢复：凭 prediction id 重取（GET /v1/predictions/<id>，服务端托管不重复扣费）
+export async function resume({ request_id: prediction_id, apiKey, onLog = () => {}, timeoutMs = 300000 }) {
+  const deadline = Date.now() + timeoutMs;
+  let pred = null;
+  while (Date.now() < deadline) {
+    const r = await fetch(`https://api.replicate.com/v1/predictions/${encodeURIComponent(prediction_id)}`, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      signal: AbortSignal.timeout(30000),
+    });
+    if (r.status === 404) throw new Error(`prediction 不存在：${prediction_id}`);
+    if (r.status === 401) throw new Error('Replicate 401：token 无效');
+    if (!r.ok) throw new Error(`Replicate 轮询 HTTP ${r.status}`);
+    pred = await r.json();
+    if (['succeeded', 'failed', 'canceled'].includes(pred.status)) break;
+    onLog(`… ${pred.status}`);
+    await new Promise((r2) => setTimeout(r2, 3000));
+  }
+  if (!pred || pred.status !== 'succeeded') {
+    throw new Error(`Replicate 预测 ${pred?.status ?? '?'}: ${(pred?.error || '无错误详情').toString().slice(0, 300)}`);
+  }
+  const out = pred.output;
+  const urls = Array.isArray(out) ? out : typeof out === 'string' ? [out] : out?.images?.map((i) => (typeof i === 'string' ? i : i.url)) || [];
+  if (!urls.length) throw new Error(`Replicate output 无可用图片 URL: ${JSON.stringify(out).slice(0, 300)}`);
+  return { images: urls.map((u) => ({ url: u })), request_id: pred.id };
 }
