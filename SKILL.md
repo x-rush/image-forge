@@ -57,7 +57,7 @@ Every successful generation appends to `scripts/gen-log.jsonl` (global ledger).
 
 Read `reference/lessons.md` before assembling prompts — every entry was paid for in real spend. Non-negotiables:
 
-- Editing hits the family's `/edit` endpoint only (auto-routed); verify in-place quality with ffmpeg SSIM (>0.9 for retouching; large scene replacements judge per-region instead).
+- Editing hits the family's `/edit` endpoint only (auto-routed); verify in-place quality with ffmpeg SSIM (>0.9 for in-place edits; large scene replacements judge per-region instead).
 - Enumerate facial flaws explicitly (nasolabial folds / acne / dark circles / redness / stray hairs / oil shine) — "small flaws" gets ignored.
 - No negations in prompts; state the positive. Garment descriptions, never ethnicity names.
 - Aspect ratio respects EXIF orientation (script handles it).
