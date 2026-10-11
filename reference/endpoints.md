@@ -1,6 +1,14 @@
-# 各端点入参全表（2026-10-07 全端点 422 枚举探测实测）
+# 各端点入参全表（2026-10-07 全端点 422 枚举探测实测；2026-10-10 fal 通道统一异步队列化）
 
 > 本文件由 SKILL.md 按需引用。CLI 旗标对应：`--size`（WxH 或 openai 枚举）/`--aspect`/`--resolution`/`--quality`/`--format`/`--background`/`--compression`/`--seed`/`--n`。
+
+## fal.ai 通道异步队列化 [live 2026-10-10]
+
+- 提交：`POST queue.fal.run/<endpoint>`（原同步 fal.run 长连接退役）→ 立即回 `request_id/status_url/response_url` → 5s 轮询 status_url → COMPLETED 后 GET response_url
+- **为什么改**：同步长连接在代理环境易被掐断且中断后无任务 id 不可恢复；队列提交即得 id，中断 `gen-image --resume <request_id>` 零成本重取（已实测，resume 记账 $0）
+- 队列对图片模型同样有效（[live] flux-schnell/grok2 探测；校验在 worker 层，422 不扣费）
+- 队列命名空间 = 端点前两段（owner/model），resume 据此构造 URL
+- 鉴权与 422 探测工艺不变
 
 | 参数 | grok2 (xAI) | nb21 (Google) | gpt2 (OpenAI) | flare/sunburst (OpenAI 2.5) |
 | --- | --- | --- | --- | --- |

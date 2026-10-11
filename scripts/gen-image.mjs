@@ -74,6 +74,7 @@ function usage(msg) {
   --seed N       仅 google：复现实验
   --out 路径     输出文件，默认 samples/<时间戳>.png
   --n 数量       生成张数，默认 1
+  --resume ID    重取 fal 任务（配 --model，只下载不重新扣费；中断恢复）
   --provider P   通道 fal|replicate（默认自动选该模型可用通道）
   --intent       参数决策模式：配合 --describe 输出建议参数后退出（不生图）
   --describe 描述 需求的自然语言描述（--intent 时必填）
@@ -101,6 +102,7 @@ function parseArgs(argv) {
     else if (k === '--compression') { a.compression = parseInt(argv[++i], 10); a.given.add('compression'); }
     else if (k === '--seed') { a.seed = parseInt(argv[++i], 10); a.given.add('seed'); }
     else if (k === '--image') a.image = argv[++i];
+    else if (k === '--resume') a.resume = argv[++i];
     else if (k === '--out') a.out = argv[++i];
     else if (k === '--n') a.n = parseInt(argv[++i], 10);
     else if (k === '--report') a.report = true;
@@ -126,7 +128,7 @@ function parseArgs(argv) {
     return;
   }
   if (!a.model || !REGISTRY.models[a.model]) usage(`--model 必须是 ${Object.keys(REGISTRY.models).join('|')}（见 models.json）`);
-  if (!a.prompt) usage('--prompt 必填');
+  if (!a.prompt && !a.resume) usage('--prompt 必填（或 --resume <request_id> 重取）');
   return a;
 }
 
@@ -305,11 +307,14 @@ async function main() {
   const t0 = Date.now();
   let images;
   try {
-    const r = await provider.generate({
-      model: m.alias, endpoint: m.endpoint, isEdit: m.isEdit,
-      prompt: a.prompt, imageUris: m.isEdit ? [toDataUri(a.image)] : [],
-      params, apiKey, timeoutMs: 300_000,
-    });
+    const r = a.resume
+      ? await provider.resume({ request_id: a.resume, endpoint: m.endpoint, apiKey, onLog: (m2) => console.log('  ' + m2) })
+      : await provider.generate({
+          model: m.alias, endpoint: m.endpoint, isEdit: m.isEdit,
+          prompt: a.prompt, imageUris: m.isEdit ? [toDataUri(a.image)] : [],
+          params, apiKey, timeoutMs: 600_000,
+          onLog: (m2) => console.log('  ' + m2),
+        });
     images = r.images;
   } catch (e) {
     console.error(`生成失败（${a.model} / ${m.provider}，${((Date.now() - t0) / 1000).toFixed(1)}s）`);
@@ -342,10 +347,11 @@ async function main() {
   const est = estUsd(a);
   appendFileSync(LOG_FILE, JSON.stringify({
     ts: new Date().toISOString(), model: a.model, size: `${w}x${h}`,
-    secs: +secs, kb: Math.round(bytes.length / 1024), out: finalOut, est_usd: est,
+    secs: +secs, kb: Math.round(bytes.length / 1024), out: finalOut, est_usd: a.resume ? 0 : est,
+    note: a.resume ? 'resume（原提交已计费，此处不重复）' : undefined,
   }) + '\n');
   console.log(`✅ ${a.model} (${m.endpoint} @ ${m.provider}) ${secs}s ${(bytes.length / 1024).toFixed(0)}KB -> ${finalOut}${finalOut !== out ? `（实际格式 ${fmt}，已纠正扩展名）` : ''}`);
-  console.log(`   估算 $${est.toFixed(3)}，账单: node tools/gen-image.mjs --report`);
+  console.log(`   ${a.resume ? '♻️ resume 不重复扣费（原提交若未入账请补记）· ' : ''}估算 $${(a.resume ? 0 : est).toFixed(3)}，账单: node tools/gen-image.mjs --report`);
 }
 
 main().catch((e) => { console.error('异常: ' + (e?.cause?.message || e.message)); process.exit(3); });
