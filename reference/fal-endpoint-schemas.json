@@ -1,0 +1,632 @@
+{
+ "grok2-t2i": {
+  "path": "xai/grok-imagine-image/v2.0/text-to-image",
+  "inputSchema": "GrokImagineImageV20TextToImageInput",
+  "required": [
+   "prompt"
+  ],
+  "properties": {
+   "output_format": {
+    "type": "string",
+    "enum": [
+     "jpeg",
+     "png",
+     "webp"
+    ],
+    "default": "jpeg",
+    "desc": "The format of the generated image."
+   },
+   "num_images": {
+    "type": "integer",
+    "default": 1,
+    "desc": "Number of images to generate."
+   },
+   "prompt": {
+    "type": "string",
+    "req": true,
+    "desc": "Text description of the desired image."
+   },
+   "sync_mode": {
+    "type": "boolean",
+    "default": false,
+    "desc": "If `True`, the media will be returned as a data URI and the output data won't be available"
+   },
+   "quality": {
+    "type": "string",
+    "enum": [
+     "low",
+     "medium"
+    ],
+    "default": "medium",
+    "desc": "Quality level of the generated image."
+   },
+   "enable_safety_checker": {
+    "type": "boolean",
+    "default": true,
+    "desc": "Authorized callers may set false to request relaxed screening."
+   },
+   "aspect_ratio": {
+    "type": "string",
+    "enum": [
+     "2:1",
+     "20:9",
+     "19.5:9",
+     "16:9",
+     "4:3",
+     "3:2",
+     "1:1",
+     "2:3",
+     "3:4",
+     "9:16",
+     "9:19.5",
+     "9:20",
+     "1:2"
+    ],
+    "default": "1:1",
+    "desc": "Aspect ratio of the generated image."
+   },
+   "resolution": {
+    "type": "string",
+    "enum": [
+     "1k",
+     "2k"
+    ],
+    "default": "1k",
+    "desc": "Resolution of the generated image. `1k` for standard resolution, `2k` for high resolution."
+   }
+  }
+ },
+ "grok2-edit": {
+  "path": "xai/grok-imagine-image/v2.0/edit",
+  "inputSchema": "GrokImagineImageV20EditInput",
+  "required": [
+   "prompt"
+  ],
+  "properties": {
+   "image_urls": {
+    "type": "array",
+    "desc": "List of URLs of the images to edit. A maximum of 5 images are supported."
+   },
+   "output_format": {
+    "type": "string",
+    "enum": [
+     "jpeg",
+     "png",
+     "webp"
+    ],
+    "default": "jpeg",
+    "desc": "The format of the generated image."
+   },
+   "num_images": {
+    "type": "integer",
+    "default": 1,
+    "desc": "Number of images to generate."
+   },
+   "prompt": {
+    "type": "string",
+    "req": true,
+    "desc": "Text description of the desired image."
+   },
+   "sync_mode": {
+    "type": "boolean",
+    "default": false,
+    "desc": "If `True`, the media will be returned as a data URI and the output data won't be available"
+   },
+   "quality": {
+    "type": "string",
+    "enum": [
+     "low",
+     "medium"
+    ],
+    "default": "medium",
+    "desc": "Quality level of the edited image."
+   },
+   "enable_safety_checker": {
+    "type": "boolean",
+    "default": true,
+    "desc": "Authorized callers may set false to request relaxed screening."
+   },
+   "resolution": {
+    "type": "string",
+    "enum": [
+     "1k",
+     "2k"
+    ],
+    "default": "1k",
+    "desc": "Resolution of the generated image. `1k` for standard resolution, `2k` for high resolution."
+   },
+   "aspect_ratio": {
+    "type": "string",
+    "enum": [
+     "auto",
+     "2:1",
+     "20:9",
+     "19.5:9",
+     "16:9",
+     "4:3",
+     "3:2",
+     "1:1",
+     "2:3",
+     "3:4",
+     "9:16",
+     "9:19.5",
+     "9:20",
+     "1:2"
+    ],
+    "default": "auto",
+    "desc": "Aspect ratio of the edited image. When set to `auto` (the default), the output preserves t"
+   }
+  }
+ },
+ "nb21-t2i": {
+  "path": "fal-ai/nano-banana-2/text-to-image",
+  "error": "HTTP 404"
+ },
+ "nb21-edit": {
+  "path": "fal-ai/nano-banana-2/edit",
+  "inputSchema": "NanoBanana2EditInput",
+  "required": [
+   "prompt"
+  ],
+  "properties": {
+   "video_url": {
+    "desc": "Optional video to use as input context. Accepts an http(s)/data URL to a video file (downl"
+   },
+   "num_images": {
+    "type": "integer",
+    "default": 1,
+    "desc": "The number of images to generate."
+   },
+   "sync_mode": {
+    "type": "boolean",
+    "default": false,
+    "desc": "If `True`, the media will be returned as a data URI and the output data won't be available"
+   },
+   "system_prompt": {
+    "type": "string",
+    "default": "",
+    "desc": "Optional system instruction that steers the model's persona and output style across the re"
+   },
+   "seed": {
+    "desc": "The seed for the random number generator."
+   },
+   "enable_web_search": {
+    "type": "boolean",
+    "default": false,
+    "desc": "Enable web search for the image generation task. This will allow the model to use the late"
+   },
+   "image_urls": {
+    "type": "array",
+    "desc": "The URLs of the images to use for image-to-image generation or image editing. Optional whe"
+   },
+   "output_format": {
+    "type": "string",
+    "enum": [
+     "jpeg",
+     "png",
+     "webp"
+    ],
+    "default": "png",
+    "desc": "The format of the generated image."
+   },
+   "prompt": {
+    "type": "string",
+    "req": true,
+    "desc": "The prompt for image editing."
+   },
+   "safety_tolerance": {
+    "type": "string",
+    "enum": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5",
+     "6"
+    ],
+    "default": "4",
+    "desc": "The safety tolerance level for content moderation. 1 is the most strict (blocks most conte"
+   },
+   "pdf_url": {
+    "desc": "Optional PDF document to use as input context. Accepts an http(s)/data URL (downloaded and"
+   },
+   "limit_generations": {
+    "type": "boolean",
+    "default": true,
+    "desc": "Experimental parameter to limit the number of generations from each round of prompting to "
+   },
+   "thinking_level": {
+    "desc": "When set, enables model thinking with the given level ('minimal' or 'high') and includes t"
+   },
+   "aspect_ratio": {
+    "default": "auto",
+    "desc": "The aspect ratio of the generated image. Supports extreme ratios: 4:1, 1:4, 8:1, 1:8."
+   },
+   "audio_url": {
+    "desc": "Optional audio file to use as input context. Accepts an http(s)/data URL (downloaded and s"
+   },
+   "resolution": {
+    "type": "string",
+    "enum": [
+     "0.5K",
+     "1K",
+     "2K",
+     "4K"
+    ],
+    "default": "1K",
+    "desc": "The resolution of the image to generate."
+   }
+  }
+ },
+ "gpt2-t2i": {
+  "path": "openai/gpt-image-2/generate",
+  "error": "HTTP 404"
+ },
+ "flare-t2i": {
+  "path": "openai/gpt-image-2.5/flare/text-to-image",
+  "inputSchema": "GptImage25FlareTextToImageInput",
+  "required": [
+   "prompt"
+  ],
+  "properties": {
+   "quality": {
+    "type": "string",
+    "enum": [
+     "auto",
+     "low",
+     "medium",
+     "high",
+     "xhigh",
+     "max"
+    ],
+    "default": "high",
+    "desc": "Quality for the generated image. Higher settings increase detail, latency, and token usage"
+   },
+   "sync_mode": {
+    "type": "boolean",
+    "default": false,
+    "desc": "If `True`, the media will be returned as a data URI and the output data won't be available"
+   },
+   "enable_safety_checker": {
+    "type": "boolean",
+    "default": true,
+    "desc": "Authorized callers may set false to request relaxed screening."
+   },
+   "image_size": {
+    "default": "landscape_4_3",
+    "desc": "The size of the generated image. Supports preset names, explicit {width, height}, or 'auto"
+   },
+   "num_images": {
+    "type": "integer",
+    "default": 1,
+    "desc": "Number of images to generate"
+   },
+   "background": {
+    "type": "string",
+    "enum": [
+     "auto",
+     "transparent",
+     "opaque"
+    ],
+    "default": "auto",
+    "desc": "Background for the generated image"
+   },
+   "output_compression": {
+    "desc": "Compression level from 0 to 100. Only supported when output_format is 'jpeg' or 'webp'."
+   },
+   "output_format": {
+    "type": "string",
+    "enum": [
+     "jpeg",
+     "png",
+     "webp"
+    ],
+    "default": "png",
+    "desc": "Output format for the images"
+   },
+   "prompt": {
+    "type": "string",
+    "req": true,
+    "desc": "The prompt for image generation"
+   }
+  }
+ },
+ "sunburst-t2i": {
+  "path": "openai/gpt-image-2.5/sunburst/text-to-image",
+  "inputSchema": "GptImage25SunburstTextToImageInput",
+  "required": [
+   "prompt"
+  ],
+  "properties": {
+   "quality": {
+    "type": "string",
+    "enum": [
+     "auto",
+     "low",
+     "medium",
+     "high",
+     "xhigh",
+     "max"
+    ],
+    "default": "high",
+    "desc": "Quality for the generated image. Higher settings increase detail, latency, and token usage"
+   },
+   "sync_mode": {
+    "type": "boolean",
+    "default": false,
+    "desc": "If `True`, the media will be returned as a data URI and the output data won't be available"
+   },
+   "enable_safety_checker": {
+    "type": "boolean",
+    "default": true,
+    "desc": "Authorized callers may set false to request relaxed screening."
+   },
+   "image_size": {
+    "default": "landscape_4_3",
+    "desc": "The size of the generated image. Supports preset names, explicit {width, height}, or 'auto"
+   },
+   "num_images": {
+    "type": "integer",
+    "default": 1,
+    "desc": "Number of images to generate"
+   },
+   "background": {
+    "type": "string",
+    "enum": [
+     "auto",
+     "transparent",
+     "opaque"
+    ],
+    "default": "auto",
+    "desc": "Background for the generated image"
+   },
+   "output_compression": {
+    "desc": "Compression level from 0 to 100. Only supported when output_format is 'jpeg' or 'webp'."
+   },
+   "output_format": {
+    "type": "string",
+    "enum": [
+     "jpeg",
+     "png",
+     "webp"
+    ],
+    "default": "png",
+    "desc": "Output format for the images"
+   },
+   "prompt": {
+    "type": "string",
+    "req": true,
+    "desc": "The prompt for image generation"
+   }
+  }
+ },
+ "gpt2-edit": {
+  "path": "openai/gpt-image-2/edit",
+  "inputSchema": "GptImage2EditInput",
+  "required": [
+   "prompt",
+   "image_urls"
+  ],
+  "properties": {
+   "mask_url": {
+    "desc": "The URL of the mask image to use for the generation. This indicates what part of the image"
+   },
+   "image_urls": {
+    "type": "array",
+    "req": true,
+    "desc": "The URLs of the images to use as a reference for the generation. A maximum of 16 images ar"
+   },
+   "output_format": {
+    "type": "string",
+    "enum": [
+     "jpeg",
+     "png",
+     "webp"
+    ],
+    "default": "png",
+    "desc": "Output format for the images"
+   },
+   "prompt": {
+    "type": "string",
+    "req": true,
+    "desc": "The prompt for image generation"
+   },
+   "num_images": {
+    "type": "integer",
+    "default": 1,
+    "desc": "Number of images to generate"
+   },
+   "sync_mode": {
+    "type": "boolean",
+    "default": false,
+    "desc": "If `True`, the media will be returned as a data URI and the output data won't be available"
+   },
+   "image_size": {
+    "default": "auto",
+    "desc": "The size of the generated image. Use 'auto' to infer from input images."
+   },
+   "quality": {
+    "type": "string",
+    "enum": [
+     "auto",
+     "low",
+     "medium",
+     "high"
+    ],
+    "default": "high",
+    "desc": "Quality for the generated image. Use 'auto' to let the model pick the best quality for the"
+   },
+   "enable_safety_checker": {
+    "type": "boolean",
+    "default": true,
+    "desc": "Authorized callers may set false to request relaxed screening."
+   },
+   "background": {
+    "type": "string",
+    "enum": [
+     "auto",
+     "transparent",
+     "opaque"
+    ],
+    "default": "auto",
+    "desc": "Background for the generated image"
+   }
+  }
+ },
+ "flare-edit": {
+  "path": "openai/gpt-image-2.5/flare/edit",
+  "inputSchema": "GptImage25FlareEditInput",
+  "required": [
+   "prompt",
+   "image_urls"
+  ],
+  "properties": {
+   "quality": {
+    "type": "string",
+    "enum": [
+     "auto",
+     "low",
+     "medium",
+     "high",
+     "xhigh",
+     "max"
+    ],
+    "default": "high",
+    "desc": "Quality for the generated image. Higher settings increase detail, latency, and token usage"
+   },
+   "mask_url": {
+    "desc": "The URL of the mask image to use for the generation. This indicates what part of the image"
+   },
+   "enable_safety_checker": {
+    "type": "boolean",
+    "default": true,
+    "desc": "Authorized callers may set false to request relaxed screening."
+   },
+   "sync_mode": {
+    "type": "boolean",
+    "default": false,
+    "desc": "If `True`, the media will be returned as a data URI and the output data won't be available"
+   },
+   "prompt": {
+    "type": "string",
+    "req": true,
+    "desc": "The prompt for image generation"
+   },
+   "image_size": {
+    "default": "auto",
+    "desc": "The size of the generated image. Use 'auto' to infer from input images."
+   },
+   "num_images": {
+    "type": "integer",
+    "default": 1,
+    "desc": "Number of images to generate"
+   },
+   "background": {
+    "type": "string",
+    "enum": [
+     "auto",
+     "transparent",
+     "opaque"
+    ],
+    "default": "auto",
+    "desc": "Background for the generated image"
+   },
+   "output_compression": {
+    "desc": "Compression level from 0 to 100. Only supported when output_format is 'jpeg' or 'webp'."
+   },
+   "image_urls": {
+    "type": "array",
+    "req": true,
+    "desc": "The URLs of the images to use as a reference for the generation. A maximum of 16 images ar"
+   },
+   "output_format": {
+    "type": "string",
+    "enum": [
+     "jpeg",
+     "png",
+     "webp"
+    ],
+    "default": "png",
+    "desc": "Output format for the images"
+   }
+  }
+ },
+ "sunburst-edit": {
+  "path": "openai/gpt-image-2.5/sunburst/edit",
+  "inputSchema": "GptImage25SunburstEditInput",
+  "required": [
+   "prompt",
+   "image_urls"
+  ],
+  "properties": {
+   "quality": {
+    "type": "string",
+    "enum": [
+     "auto",
+     "low",
+     "medium",
+     "high",
+     "xhigh",
+     "max"
+    ],
+    "default": "high",
+    "desc": "Quality for the generated image. Higher settings increase detail, latency, and token usage"
+   },
+   "mask_url": {
+    "desc": "The URL of the mask image to use for the generation. This indicates what part of the image"
+   },
+   "enable_safety_checker": {
+    "type": "boolean",
+    "default": true,
+    "desc": "Authorized callers may set false to request relaxed screening."
+   },
+   "sync_mode": {
+    "type": "boolean",
+    "default": false,
+    "desc": "If `True`, the media will be returned as a data URI and the output data won't be available"
+   },
+   "prompt": {
+    "type": "string",
+    "req": true,
+    "desc": "The prompt for image generation"
+   },
+   "image_size": {
+    "default": "auto",
+    "desc": "The size of the generated image. Use 'auto' to infer from input images."
+   },
+   "num_images": {
+    "type": "integer",
+    "default": 1,
+    "desc": "Number of images to generate"
+   },
+   "background": {
+    "type": "string",
+    "enum": [
+     "auto",
+     "transparent",
+     "opaque"
+    ],
+    "default": "auto",
+    "desc": "Background for the generated image"
+   },
+   "output_compression": {
+    "desc": "Compression level from 0 to 100. Only supported when output_format is 'jpeg' or 'webp'."
+   },
+   "image_urls": {
+    "type": "array",
+    "req": true,
+    "desc": "The URLs of the images to use as a reference for the generation. A maximum of 16 images ar"
+   },
+   "output_format": {
+    "type": "string",
+    "enum": [
+     "jpeg",
+     "png",
+     "webp"
+    ],
+    "default": "png",
+    "desc": "Output format for the images"
+   }
+  }
+ }
+}
