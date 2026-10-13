@@ -29,6 +29,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const SKILL_DIR = join(dirname(fileURLToPath(import.meta.url)), '..');
 const REGISTRY = JSON.parse(readFileSync(join(SKILL_DIR, 'models.json'), 'utf8'));
+// [live 2026-10-13] schema 即守门：fal OpenAPI 存档（10 端点，path/properties/enum/required 全量）
+// 注册表按渠道记参数，schema 按端点记——两者有出入时以 schema 为准（fal worker 会静默忽略未知参数）
+const FAL_SCHEMAS = JSON.parse(readFileSync(join(SKILL_DIR, 'reference', 'fal-endpoint-schemas.json'), 'utf8'));
 
 function loadProvider(name) {
   return import(pathToFileURL(join(SKILL_DIR, 'providers', `${name}.mjs`)).href);
@@ -263,6 +266,31 @@ function buildParams(a, w, h, m) {
   return p;
 }
 
+// [live 2026-10-13] schema 逐键守门：最终请求体对照 fal OpenAPI 存档（仅 fal 通道；replicate 无存档跳过）
+// 未知键/枚举违反 → 硬错（fal worker 静默忽略未知参数，这里不拦就是语义退化）；required 缺失 → 仅警告
+function validateSchema(params, m) {
+  if (m.provider !== 'fal') return;
+  const entry = Object.values(FAL_SCHEMAS).find((e) => e.path === m.endpoint);
+  if (!entry) { console.error(`⚠️ ${m.endpoint} 无 schema 存档，本发跳过逐键校验`); return; }
+  const props = entry.properties ?? {};
+  const unknown = Object.keys(params).filter((k) => !(k in props));
+  if (unknown.length) {
+    console.error(`错误: 请求体含 ${m.endpoint} schema 中不存在的参数: ${unknown.join(', ')}（fal 会静默忽略→语义退化）`);
+    console.error(`   该端点全部参数: ${Object.keys(props).join(', ')}`);
+    console.error('   权威清单: reference/fal-endpoint-schemas.json');
+    process.exit(2);
+  }
+  for (const [k, v] of Object.entries(params)) {
+    const def = props[k];
+    if (def?.enum && v != null && !def.enum.includes(v) && !def.enum.includes(String(v))) {
+      console.error(`错误: 参数 ${k}=${JSON.stringify(v)} 不在 ${m.endpoint} 的枚举 ${JSON.stringify(def.enum)} 内`);
+      process.exit(2);
+    }
+  }
+  const missing = (entry.required ?? []).filter((k) => !(k in params));
+  if (missing.length) console.error(`⚠️ schema 标记必填但未传: ${missing.join(', ')}（带默认值的字段 worker 会自动补全；若 422 按报错补传）`);
+}
+
 function report() {
   if (!existsSync(LOG_FILE)) { console.log('暂无生图记录（账本 tools/gen-log.jsonl 尚未生成）'); return; }
   const rows = readFileSync(LOG_FILE, 'utf8').trim().split('\n').map((l) => JSON.parse(l));
@@ -300,6 +328,8 @@ async function main() {
     if (dim) { a.inW = dim.w; a.inH = dim.h; }
   }
   const params = buildParams(a, w, h, m);
+  validateSchema({ prompt: a.prompt, ...params }, m); // schema 逐键守门（prompt 独立传参，合并后对照 required）
+  console.log(`📤 ${m.endpoint} ← [${['prompt', ...Object.keys(params)].join(', ')}]`);
   const provider = await loadProvider(m.provider);
   const authEnv = REGISTRY.providers[m.provider].auth_env;
   const apiKey = process.env[authEnv]
@@ -347,6 +377,7 @@ async function main() {
   const est = estUsd(a);
   appendFileSync(LOG_FILE, JSON.stringify({
     ts: new Date().toISOString(), model: a.model, size: `${w}x${h}`,
+    endpoint: m.endpoint, param_keys: ['prompt', ...Object.keys(params)],
     secs: +secs, kb: Math.round(bytes.length / 1024), out: finalOut, est_usd: a.resume ? 0 : est,
     note: a.resume ? 'resume（原提交已计费，此处不重复）' : undefined,
   }) + '\n');
