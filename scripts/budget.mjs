@@ -95,7 +95,7 @@ if (args[0] === "--check") {
   if (!budget) { console.log(`[预算] 未设置（本月已用 ${usd(monthUsd)} / ${month.length} 张；累计 ${usd(totalUsd)} / ${entries.length} 张${balTxt}）。设预算：budget.mjs --set <月额度>`); process.exit(0); }
   const pct = (monthUsd / budget) * 100;
   const line = `[预算] 本月 ${usd(monthUsd)} / ${usd(budget)}（${pct.toFixed(0)}%，${month.length} 张）· 今日 ${usd(todayUsd)} · 累计 ${usd(totalUsd)}${balTxt}`;
-  if (pct >= 100) { console.log(`⛔ 超支 ` + line + ` ——继续生成须用户明示同意`); process.exit(2); }
+  if (pct >= 100) { console.log(`[BLOCKED:BUDGET] ⛔ 超支 ` + line + ` ——继续生成须用户明示同意`); process.exit(2); }
   if (pct >= 80) { console.log(`⚠️ 接近上限 ` + line + ` ——生成前提醒用户余量`); process.exit(0); }
   console.log(line); process.exit(0);
 }
@@ -118,7 +118,7 @@ if (budget) {
   const pct = (monthUsd / budget) * 100;
   const remain = Math.max(0, budget - monthUsd);
   console.log(`月预算  ：${usd(budget)} · 已用 ${pct.toFixed(0)}% · 余 ${usd(remain)}`);
-  if (pct >= 100) console.log("⛔ 已超支：继续生成须用户明示同意");
+  if (pct >= 100) console.log("[BLOCKED:BUDGET] ⛔ 已超支：继续生成须用户明示同意");
   else if (pct >= 80) console.log("⚠️ 已用 ≥80%：每次生成前提醒用户余量");
 } else {
   console.log(`月预算  ：未设置（budget.mjs --set <额度美元> 可设置，如 --set 20）`);
